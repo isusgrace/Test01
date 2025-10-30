@@ -288,111 +288,147 @@
 
     D. เครื่องคิดเลข
 
-30. iOS เวอร์ชันใหม่มักเปิดตัวพร้อมกับอะไร?
+30. iOS เวอร์ชันใหม่มักเปิดตัวพร้อมกับอะไร
 
-A. iPad รุ่นใหม่
-B. iPhone รุ่นใหม่
-C. Apple Watch รุ่นใหม่
-D. MacBook รุ่นใหม่
+    A. iPad รุ่นใหม่
+    
+    B. iPhone รุ่นใหม่
 
-1
+    C. Apple Watch รุ่นใหม่
 
-เหตุใด iOS จึงใช้ sandboxing กับแอปต่าง ๆ?
-A. เพื่อเร่งความเร็ว UI
-B. ป้องกันแอปเข้าถึงทรัพยากรระบบ/แอปอื่นโดยไม่อนุญาต
-C. เพิ่มขนาดไฟล์แอป
-D. ลดการใช้งานแบตเตอรี่
-คำตอบ: B — sandbox จำกัดสิทธิ์ของแต่ละแอปเพื่อความปลอดภัยและความเป็นส่วนตัว.
+    D. MacBook รุ่นใหม่
 
-2
+31. เหตุใด iOS จึงใช้ sandboxing กับแอปต่าง ๆ
+    
+    A. เพื่อเร่งความเร็ว UI
+    
+    B. ป้องกันแอปเข้าถึงทรัพยากรระบบ/แอปอื่นโดยไม่อนุญาต
 
-อะไรคือผลของ ARC (Automatic Reference Counting) ใน Objective-C/Swift?
-A. จัดการการวางแผน UI อัตโนมัติ
-B. จัดการหน่วยความจำด้วยการเพิ่ม/ลด reference count ให้วัตถุโดยอัตโนมัติ
-C. รันโค้ดบน GPU
-D. ป้องกัน race condition อัตโนมัติ
-คำตอบ: B — ARC เพิ่ม/ลด retain count และปล่อยวัตถุเมื่อ count เป็น 0.
+    C. เพิ่มขนาดไฟล์แอป
 
-3
+    D. ลดการใช้งานแบตเตอรี่
 
-เมื่อใช้ GCD (Grand Central Dispatch) แล้ว การเรียก UI ต้องทำบนคิวใดเสมอ?
-A. background global queue
-B. custom concurrent queue
-C. main queue
-D. any queue ก็ได้
-คำตอบ: C — ทุกการอัพเดต UI ต้องทำบน main queue.
+    คำตอบ: B — sandbox จำกัดสิทธิ์ของแต่ละแอปเพื่อความปลอดภัยและความเป็นส่วนตัว
 
-4
+32. อะไรคือผลของ ARC (Automatic Reference Counting) ใน Objective-C/Swift
 
-哪 (sic) pattern ใดที่ Apple แนะนำเพื่อจัดการ asynchronous flows ใน Swift ยุคใหม่?
-A. Delegation เท่านั้น
-B. Callback hell เท่านั้น
-C. Combine หรือ async/await (Swift concurrency)
-D. KVO เท่านั้น
-คำตอบ: C — Combine และ async/await เป็น API ที่ทันสมัยสำหรับ flow แบบ asynchronous.
+    A. จัดการการวางแผน UI อัตโนมัติ
 
-5
+    B. จัดการหน่วยความจำด้วยการเพิ่ม/ลด reference count ให้วัตถุโดยอัตโนมัติ
 
-อะไรคือ purpose ของ provisioning profile ในการแจกจ่ายแอป iOS?
-A. เพิ่มความเร็วแอป
-B. เชื่อม bundle id, certificate และ device (สำหรับ development) เพื่อให้แอปลงบนอุปกรณ์ได้
-C. แปลง Swift เป็น Objective-C
-D. สำรองข้อมูลแอป
-คำตอบ: B — profile ระบุว่าคีย์/อุปกรณ์ใดอนุญาตให้ติดตั้งแอปได้.
+    C. รันโค้ดบน GPU
 
-6
+    D. ป้องกัน race condition อัตโนมัติ
 
-Bitcode คืออะไร (เมื่อเคยเปิดใช้งาน) และประโยชน์หลักคืออะไร?
-A. รูปแบบรูปภาพใหม่
-B. Intermediate representation ของไบนารี่ที่อนุญาตให้ Apple re-optimize ไบนารี่หลังส่งขึ้น App Store
-C. โปรโตคอลเครือข่าย
-D. ฟอร์แม็ตเสียง
-คำตอบ: B — bitcode ช่วยให้ Apple ทำการแปลง/ปรับปรุงไบนารี่หลังส่งได้ (ปัจจุบันบางกรณีถูกเลิกบังคับ).
+    คำตอบ: B — ARC เพิ่ม/ลด retain count และปล่อยวัตถุเมื่อ count เป็น 0
 
-7
+33. เมื่อใช้ GCD (Grand Central Dispatch) แล้ว การเรียก UI ต้องทำบนคิวใดเสมอ
 
-Core Data ใช้เพื่ออะไรหลักๆ?
-A. แสดง UI แบบกราฟิก
-B. เป็น ORM/framework สำหรับจัดการ persistent object graph และการเก็บข้อมูลบนอุปกรณ์
-C. จัดการการเชื่อมต่อ Bluetooth
-D. ทำ animation
-คำตอบ: B — Core Data จัดการ object graph, persistence, undo/redo, ฯลฯ.
+    A. background global queue
 
-8
+    B. custom concurrent queue
 
-ใน Core Data หากทำงานกับ NSManagedObjectContext หลายคอนเท็กซ์ ควรใช้ pattern ใดเพื่อป้องกันปัญหาการแข่งขัน (concurrency)?
-A. เขียนทุกอย่างบน main thread
-B. ใช้ NSPrivateQueueConcurrencyType/NSMainQueueConcurrencyType และ perform/performAndWait เพื่อทำงานกับ context
-C. สร้าง context ใหม่ทุกครั้งโดยไม่ตั้ง concurrency type
-D. ไม่สนใจ concurrency
-คำตอบ: B — ต้องกำหนด concurrency type และใช้ perform APIs เพื่อให้ thread-safe.
+    C. main queue
 
-9
+    D. any queue ก็ได้
 
-อะไรคือ purpose ของ App Transport Security (ATS)?
-A. บังคับให้แอปต้องใช้ Dark Mode
-B. บังคับการเชื่อมต่อเครือข่ายให้ปลอดภัย (HTTPS/TLS ตามมาตรฐาน)
-C. ปรับความสว่างหน้าจอ
-D. จัดการ push notification
-คำตอบ: B — ATS บังคับการเชื่อมต่อที่ปลอดภัยยกเว้นจะตั้งข้อยกเว้น.
+    คำตอบ: C — ทุกการอัพเดต UI ต้องทำบน main queue
 
-10
+34. pattern ใดที่ Apple แนะนำเพื่อจัดการ asynchronous flows ใน Swift ยุคใหม่
 
-Push notifications บน iOS ใช้บริการใดเป็นตัวส่งจากเซิร์ฟเวอร์ไปยังอุปกรณ์?
-A. Firebase Realtime Database
-B. Apple Push Notification service (APNs)
-C. Google Cloud Messaging (GCM)
-D. MQTT
-คำตอบ: B — APNs เป็นระบบของ Apple สำหรับ push.
+    A. Delegation เท่านั้น
 
-11
+    B. Callback hell เท่านั้น
 
-อะไรคือ difference ระหว่าง Frame และ Bounds ของ UIView?
-A. Frame คือขนาดในระบบพิกัดของ superview; Bounds คือขนาดและออริจินในระบบพิกัดของตัวเอง
-B. ไม่มีความต่าง
-C. Frame เก็บสีของ view; Bounds เก็บฟอนต์
-D. Frame สำหรับ layout เท่านั้น; Bounds สำหรับ animation เท่านั้น
-คำตอบ: A — Frame อยู่ใน coordinate ของ superview; bounds อยู่ใน coordinate ของ view เอง.
+    C. Combine หรือ async/await (Swift concurrency)
+
+    D. KVO เท่านั้น
+    
+    คำตอบ: C — Combine และ async/await เป็น API ที่ทันสมัยสำหรับ flow แบบ asynchronous
+
+35. อะไรคือ purpose ของ provisioning profile ในการแจกจ่ายแอป iOS
+
+    A. เพิ่มความเร็วแอป
+
+    B. เชื่อม bundle id, certificate และ device (สำหรับ development) เพื่อให้แอปลงบนอุปกรณ์ได้
+
+    C. แปลง Swift เป็น Objective-C
+
+    D. สำรองข้อมูลแอป
+
+    คำตอบ: B — profile ระบุว่าคีย์/อุปกรณ์ใดอนุญาตให้ติดตั้งแอปได้
+
+36. Bitcode คืออะไร (เมื่อเคยเปิดใช้งาน) และประโยชน์หลักคืออะไร
+
+    A. รูปแบบรูปภาพใหม่
+
+    B. Intermediate representation ของไบนารี่ที่อนุญาตให้ Apple re-optimize ไบนารี่หลังส่งขึ้น App Store
+
+    C. โปรโตคอลเครือข่าย
+
+    D. ฟอร์แม็ตเสียง
+
+    คำตอบ: B — bitcode ช่วยให้ Apple ทำการแปลง/ปรับปรุงไบนารี่หลังส่งได้ (ปัจจุบันบางกรณีถูกเลิกบังคับ)
+
+37. Core Data ใช้เพื่ออะไรหลัก ๆ
+
+    A. แสดง UI แบบกราฟิก
+
+    B. เป็น ORM/framework สำหรับจัดการ persistent object graph และการเก็บข้อมูลบนอุปกรณ์
+
+    C. จัดการการเชื่อมต่อ Bluetooth
+
+    D. ทำ animation
+
+    คำตอบ: B — Core Data จัดการ object graph, persistence, undo/redo, ฯลฯ
+
+38. ใน Core Data หากทำงานกับ NSManagedObjectContext หลายคอนเท็กซ์ ควรใช้ pattern ใดเพื่อป้องกันปัญหาการแข่งขัน (concurrency)
+
+    A. เขียนทุกอย่างบน main thread
+
+    B. ใช้ NSPrivateQueueConcurrencyType/NSMainQueueConcurrencyType และ perform/performAndWait เพื่อทำงานกับ context
+
+    C. สร้าง context ใหม่ทุกครั้งโดยไม่ตั้ง concurrency type
+
+    D. ไม่สนใจ concurrency
+
+    คำตอบ: B — ต้องกำหนด concurrency type และใช้ perform APIs เพื่อให้ thread-safe
+
+39. อะไรคือ purpose ของ App Transport Security (ATS)
+
+    A. บังคับให้แอปต้องใช้ Dark Mode
+
+    B. บังคับการเชื่อมต่อเครือข่ายให้ปลอดภัย (HTTPS/TLS ตามมาตรฐาน)
+
+    C. ปรับความสว่างหน้าจอ
+
+    D. จัดการ push notification
+
+    คำตอบ: B — ATS บังคับการเชื่อมต่อที่ปลอดภัยยกเว้นจะตั้งข้อยกเว้น
+
+40. Push notifications บน iOS ใช้บริการใดเป็นตัวส่งจากเซิร์ฟเวอร์ไปยังอุปกรณ์
+
+    A. Firebase Realtime Database
+
+    B. Apple Push Notification service (APNs)
+
+    C. Google Cloud Messaging (GCM)
+
+    D. MQTT
+
+    คำตอบ: B — APNs เป็นระบบของ Apple สำหรับ push
+
+41. อะไรคือ difference ระหว่าง Frame และ Bounds ของ UIView
+
+    A. Frame คือขนาดในระบบพิกัดของ superview; Bounds คือขนาดและออริจินในระบบพิกัดของตัวเอง
+
+    B. ไม่มีความต่าง
+
+    C. Frame เก็บสีของ view; Bounds เก็บฟอนต์
+
+    D. Frame สำหรับ layout เท่านั้น; Bounds สำหรับ animation เท่านั้น
+
+    คำตอบ: A — Frame อยู่ใน coordinate ของ superview; bounds อยู่ใน coordinate ของ view เอง
 
 12
 
