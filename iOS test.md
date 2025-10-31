@@ -430,68 +430,89 @@
 
     คำตอบ: A — Frame อยู่ใน coordinate ของ superview; bounds อยู่ใน coordinate ของ view เอง
 
-12
+42. สำหรับการทดสอบ UI อัตโนมัติบน iOS ควรใช้กรอบการทดสอบใดโดยตรง
 
-สำหรับการทดสอบ UI อัตโนมัติบน iOS ควรใช้กรอบการทดสอบใดโดยตรง?
-A. XCTest + XCUITest
-B. JUnit
-C. Selenium (สำหรับ iOS)
-D. PHPUnit
-คำตอบ: A — XCTest/XCUITest คือ framework ของ Apple สำหรับ unit และ UI tests.
+    A. XCTest + XCUITest
 
-13
+    B. JUnit
 
-เมื่อจะเข้ารหัสข้อมูลลับเช่น token บนเครื่อง ควรเก็บที่ไหนเพื่อความปลอดภัยสูงสุด?
-A. UserDefaults
-B. Plain file ใน Documents
-C. Keychain
-D. NSCache
-คำตอบ: C — Keychain ถูกออกแบบสำหรับเก็บข้อมูลลับและเข้ารหัสอย่างปลอดภัย.
+    C. Selenium (สำหรับ iOS)
 
-14
+    D. PHPUnit
 
-อะไรเป็นสาเหตุหลักที่แอปถูกปฏิเสธจาก App Store ในเรื่องสิทธิ์ (entitlements)?
-A. ใช้สี UI ไม่ถูกต้อง
-B. ประกาศ entitlement ที่ไม่ได้รับอนุญาตใน provisioning/certificates หรือใช้ฟีเจอร์ที่ต้องขออนุมัติพิเศษโดยไม่มีการขออนุญาต
-C. มี screenshot ไม่ชัด
-D. ชื่อแอปสั้นเกินไป
-คำตอบ: B — Entitlements ต้องตรงกับ provisioning และบาง entitlement ต้องขอจาก Apple.
+    คำตอบ: A — XCTest/XCUITest คือ framework ของ Apple สำหรับ unit และ UI tests
 
-15
+43. เมื่อจะเข้ารหัสข้อมูลลับเช่น token บนเครื่อง ควรเก็บที่ไหนเพื่อความปลอดภัยสูงสุด
 
-อะไรคือ SceneDelegate (iOS 13+) ทำหน้าที่อะไรที่แตกต่างจาก AppDelegate?
-A. จัดการ lifecycle ของ UI ในระดับ scene (หลายหน้าต่าง) ขณะที่ AppDelegate ยังคงจัดการเหตุการณ์ระดับแอป เช่น launch, notifications
-B. เป็นตัวเรนเดอร์ UI เท่านั้น
-C. จัดการเครือข่ายทั้งหมด
-D. ทำงานเหมือน AppDelegate เสมอ
-คำตอบ: A — SceneDelegate จัดการแต่ละ scene/session ของ UI.
+    A. UserDefaults
 
-16
+    B. Plain file ใน Documents
 
-เมื่อใช้ URLSession เพื่อดาวน์โหลดไฟล์ขนาดใหญ่ใน background ต้องใช้ configuration แบบใด?
-A. defaultSessionConfiguration
-B. ephemeralSessionConfiguration
-C. backgroundSessionConfiguration (background URLSession)
-D. ไม่มีความจำเป็นต้องเลือกพิเศษ
-คำตอบ: C — ต้องใช้ background configuration เพื่อให้ดาวน์โหลดต่อได้เมื่อแอปอยู่ background.
+    C. Keychain
 
-17
+    D. NSCache
 
-อะไรคือ purpose ของ provisioning certificate (signing certificate) ใน iOS dev flow?
-A. สร้าง UI อัตโนมัติ
-B. ตรวจสอบความถูกต้องของผู้พัฒนาและใช้สำหรับ code signing เพื่อยืนยันไบนารี่ก่อนติดตั้งบนอุปกรณ์/ส่ง App Store
-C. สำรองข้อมูลแอปอัตโนมัติ
-D. แปลงภาพเป็น PDF
-คำตอบ: B — certificate ใช้สำหรับ signing และแสดงตัวตนผู้พัฒนา.
+    คำตอบ: C — Keychain ถูกออกแบบสำหรับเก็บข้อมูลลับและเข้ารหัสอย่างปลอดภัย
 
-18
+44. อะไรเป็นสาเหตุหลักที่แอปถูกปฏิเสธจาก App Store ในเรื่องสิทธิ์ (entitlements)
 
-อะไรคือ main advantage ของ Swift structs เทียบกับ classes?
-A. structs เป็น reference type; classes เป็น value type
-B. structs เป็น value type (copy-on-write semantics บางกรณี) ทำให้ปลอดภัยต่อ concurrent mutation ในหลายสถานการณ์
-C. structs ทำงานบน GPU
-D. ไม่มีความต่าง
-คำตอบ: B — structs เป็น value types; classes เป็น reference types.
+    A. ใช้สี UI ไม่ถูกต้อง
+
+    B. ประกาศ entitlement ที่ไม่ได้รับอนุญาตใน provisioning/certificates หรือใช้ฟีเจอร์ที่ต้องขออนุมัติพิเศษโดยไม่มีการขออนุญาต
+
+    C. มี screenshot ไม่ชัด
+
+    D. ชื่อแอปสั้นเกินไป
+    
+    คำตอบ: B — Entitlements ต้องตรงกับ provisioning และบาง entitlement ต้องขอจาก Apple
+
+45. อะไรคือ SceneDelegate (iOS 13+) ทำหน้าที่อะไรที่แตกต่างจาก AppDelegate
+
+    A. จัดการ lifecycle ของ UI ในระดับ scene (หลายหน้าต่าง) ขณะที่ AppDelegate ยังคงจัดการเหตุการณ์ระดับแอป เช่น launch, notifications
+
+    B. เป็นตัวเรนเดอร์ UI เท่านั้น
+
+    C. จัดการเครือข่ายทั้งหมด
+
+    D. ทำงานเหมือน AppDelegate เสมอ
+
+    คำตอบ: A — SceneDelegate จัดการแต่ละ scene/session ของ UI
+
+46. เมื่อใช้ URLSession เพื่อดาวน์โหลดไฟล์ขนาดใหญ่ใน background ต้องใช้ configuration แบบใด
+
+    A. defaultSessionConfiguration
+
+    B. ephemeralSessionConfiguration
+
+    C. backgroundSessionConfiguration (background URLSession)
+
+    D. ไม่มีความจำเป็นต้องเลือกพิเศษ
+
+    คำตอบ: C — ต้องใช้ background configuration เพื่อให้ดาวน์โหลดต่อได้เมื่อแอปอยู่ background
+
+47. อะไรคือ purpose ของ provisioning certificate (signing certificate) ใน iOS dev flow
+
+    A. สร้าง UI อัตโนมัติ
+
+    B. ตรวจสอบความถูกต้องของผู้พัฒนาและใช้สำหรับ code signing เพื่อยืนยันไบนารี่ก่อนติดตั้งบนอุปกรณ์/ส่ง App Store
+
+    C. สำรองข้อมูลแอปอัตโนมัติ
+
+    D. แปลงภาพเป็น PDF
+
+    คำตอบ: B — certificate ใช้สำหรับ signing และแสดงตัวตนผู้พัฒนา
+
+48. อะไรคือ main advantage ของ Swift structs เทียบกับ classes?
+
+    A. structs เป็น reference type; classes เป็น value type
+    
+    B. structs เป็น value type (copy-on-write semantics บางกรณี) ทำให้ปลอดภัยต่อ concurrent mutation ในหลายสถานการณ์
+    
+    C. structs ทำงานบน GPU
+    
+    D. ไม่มีความต่าง
+    
+    คำตอบ: B — structs เป็น value types; classes เป็น reference types.
 
 19
 
