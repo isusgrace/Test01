@@ -700,11 +700,25 @@
 
     D. ป้องกัน race condition อัตโนมัติ
 
-    คำตอบ:
+    คำตอบ: B
 
-    อธิบาย:
+    อธิบาย: ARC (Automatic Reference Counting)ARC เป็นคุณสมบัติที่สำคัญในภาษา Objective-C และ Swift มีบทบาทโดยตรงในการจัดการหน่วยความจำ (Memory Management) สำหรับอินสแตนซ์ของคลาส (Objects)
 
-46. เมื่อใช้ GCD (Grand Central Dispatch) แล้ว การเรียก UI ต้องทำบนคิวใดเสมอ
+           - หน้าที่หลัก: ARC จะติดตามจำนวนการอ้างอิง (Reference Count) ไปยังแต่ละวัตถุในหน่วยความจำ เมื่อมีโค้ดที่ต้องการใช้งานวัตถุนั้น ARC จะเพิ่ม (Increment) ตัวนับการอ้างอิง และเมื่อการใช้งานสิ้นสุดลง ARC จะลด (Decrement) ตัวนับนั้นโดยอัตโนมัติ
+
+           - ผลลัพธ์: เมื่อตัวนับการอ้างอิงของวัตถุใดๆ ลดลงจนเป็นศูนย์ (Reference Count = 0) ARC จะถือว่าไม่มีโค้ดใดๆ ต้องการใช้วัตถุนั้นอีกต่อไป และจะทำการปลดปล่อยหน่วยความจำ (Deallocate) ที่วัตถุนั้นใช้งานอยู่โดยอัตโนมัติ
+
+           - ความสำคัญ: ช่วยให้นักพัฒนาไม่ต้องเขียนโค้ดเพื่อจัดการหน่วยความจำด้วยตนเอง (เช่น การเรียก retain, release, หรือ autorelease ใน Objective-C แบบเก่า) ซึ่งช่วยลดข้อผิดพลาด (เช่น Memory Leaks หรือ Dangling Pointers) และทำให้โค้ดมีความสะอาดและเขียนได้ง่ายขึ้นมากดังนั้น ARC จึงเป็นกลไกในการจัดการหน่วยความจำแบบ อัตโนมัติ (Automatic) โดยใช้หลักการนับการอ้างอิง (Reference Counting)
+
+           เหตุผลที่ตัวเลือกอื่นไม่ถูกต้อง:
+
+           - A. จัดการการวางแผน UI อัตโนมัติ: เป็นหน้าที่ของเฟรมเวิร์ก UIKit (Objective-C) หรือ SwiftUI (Swift) ไม่ใช่ ARC
+
+           - C. รันโค้ดบน GPU: เป็นหน้าที่ของเฟรมเวิร์กสำหรับกราฟิก เช่น Metal หรือ OpenGL/ES
+
+           - D. ป้องกัน race condition อัตโนมัติ: เป็นหน้าที่ของการเขียนโค้ดจัดการ Concurrency โดยใช้กลไกต่างๆ เช่น Locks, Semaphores, หรือ Grand Central Dispatch (GCD) ไม่ใช่หน้าที่ของ ARC ซึ่งเน้นที่การจัดการหน่วยความจำ
+
+47. เมื่อใช้ GCD (Grand Central Dispatch) แล้ว การเรียก UI ต้องทำบนคิวใดเสมอ
 
     A. background global queue
 
@@ -714,11 +728,25 @@
 
     D. any queue ก็ได้
 
-    คำตอบ:
+    คำตอบ: C
 
-    อธิบาย:
+    อธิบาย: เมื่อใช้ GCD (Grand Central Dispatch) ในการพัฒนาแอปพลิเคชัน iOS/macOS มีกฎพื้นฐานที่สำคัญคือ:
 
-47. pattern ใดที่ Apple แนะนำเพื่อจัดการ asynchronous flows ใน Swift ยุคใหม่
+           1. Main Thread (เธรดหลัก) คือที่เดียวที่สามารถแก้ไข User Interface (UI) ได้:
+
+              - ระบบปฏิบัติการ iOS ได้รับการออกแบบให้การเปลี่ยนแปลงใดๆ ที่เกิดขึ้นกับส่วนประกอบ UI (เช่น การอัปเดตข้อความบนป้าย, การเปลี่ยนรูปภาพ, การแสดงผลหน้าจอใหม่) จะต้องเกิดขึ้นบน เธรดหลัก (Main Thread) เท่านั้น
+
+              - การทำเช่นนี้เพื่อป้องกันปัญหา Race Condition (การแข่งขันของข้อมูล) และความไม่สอดคล้องกัน (Inconsistencies) ที่อาจเกิดขึ้นเมื่อเธรดหลายตัวพยายามแก้ไข UI เดียวกันในเวลาเดียวกัน หากเธรดอื่นพยายามแก้ไข UI อาจทำให้แอปพลิเคชัน เกิดข้อผิดพลาด (Crash) หรือมีพฤติกรรมที่ไม่คาดคิด
+
+           2. Main Queue (คิวหลัก) คือตัวแทนของ Main Thread:
+
+              - Main Queue ใน GCD เป็น Serial Queue (คิวแบบเรียงลำดับ) พิเศษที่ทำงานบน Main Thread ของแอปพลิเคชัน
+
+              - เมื่อคุณส่งงานไปยัง Main Queue (เช่น โดยใช้ DispatchQueue.main.async { ... }) GCD จะรับประกันว่าโค้ดนั้นจะถูกเรียกใช้งานบน Main Thread เพื่อให้สามารถอัปเดต UI ได้อย่างปลอดภัยและถูกต้อง
+
+           ดังนั้น เมื่อใดก็ตามที่คุณทำงานหนักๆ บน Background Queue (เช่น การดาวน์โหลดข้อมูล, การคำนวณที่ซับซ้อน) และต้องการนำผลลัพธ์มาแสดงผลบนหน้าจอ คุณจะต้องสลับกลับมาเรียกใช้โค้ดส่วนที่อัปเดต UI บน Main Queue เสมอ
+
+48. pattern ใดที่ Apple แนะนำเพื่อจัดการ asynchronous flows ใน Swift ยุคใหม่
 
     A. Delegation เท่านั้น
 
@@ -730,9 +758,31 @@
     
     คำตอบ:
 
-    อธิบาย:
+    อธิบาย: Apple แนะนำสองรูปแบบหลักในการจัดการการทำงานแบบ ไม่พร้อมกัน (Asynchronous) และการไหลของข้อมูลใน Swift ยุคใหม่:
+
+           1. Async/Await (Swift Concurrency)
+
+              นี่คือแนวทางที่ Apple แนะนำมากที่สุดและเป็นวิธีการในอนาคต ที่สร้างขึ้นในภาษา Swift เอง (ตั้งแต่ Swift 5.5 และ iOS 15 เป็นต้นไป)
+
+              - Async/Await: ช่วยให้นักพัฒนาเขียนโค้ด Asynchronous ให้ดูและอ่านเหมือนโค้ด Synchronous ทั่วไป โดยใช้คีย์เวิร์ด async เพื่อระบุฟังก์ชันที่ทำงานแบบไม่พร้อมกัน และ await เพื่อหยุดการทำงานรอผลลัพธ์จากฟังก์ชันเหล่านั้น
+
+              - Actors: เป็นกลไกใหม่ที่ช่วยจัดการกับสถานะที่แชร์กัน (Shared Mutable State) ในสภาพแวดล้อมแบบ Concurrency โดยการปกป้องข้อมูลจากการเข้าถึงพร้อมกัน (Data Races) ทำให้โค้ดมีความปลอดภัยในการทำงานแบบ Multithread มากขึ้น
+
+           2. Combine Framework
+
+              - Combine: เป็นเฟรมเวิร์กที่ใช้แนวคิดของ Reactive Programming เพื่อจัดการกับเหตุการณ์ที่เกิดขึ้นต่อเนื่องตามเวลา (Streams of Events)
+
+              - หลักการ: ใช้ Publishers (ผู้เผยแพร่ข้อมูล) และ Subscribers (ผู้ติดตามข้อมูล) เพื่อจัดการการไหลของข้อมูล ซึ่งมีประโยชน์อย่างยิ่งในการจัดการเหตุการณ์ UI, การตอบสนองของเครือข่ายที่เกิดขึ้นต่อเนื่อง และการผูกข้อมูล (Data Binding) เข้ากับ UI
+
+           เหตุผลที่ตัวเลือกอื่นไม่ถูกต้อง:
+
+           - A. Delegation (การมอบหมาย) เท่านั้น: เป็นรูปแบบที่ใช้มานาน แต่ไม่ใช่วิธีจัดการ Asynchronous Flows ที่ดีที่สุดในยุคใหม่ มักใช้เพื่อตอบสนองต่อเหตุการณ์เฉพาะเจาะจงหรือการโต้ตอบของโปรโตคอล ไม่ใช่การไหลของข้อมูลต่อเนื่อง
+
+           - B. Callback hell (วงกต Callback) เท่านั้น: เป็นรูปแบบที่ ควรหลีกเลี่ยง อย่างยิ่ง เนื่องจากทำให้โค้ดยุ่งเหยิง อ่านยาก และบำรุงรักษายาก เมื่อมีการเรียกฟังก์ชัน Asynchronous ต่อกันหลายชั้น
+
+           - D. KVO (Key-Value Observing) เท่านั้น: เป็นกลไกดั้งเดิม (ส่วนใหญ่ใน Objective-C) สำหรับการสังเกตการเปลี่ยนแปลงของ property แต่ไม่ยืดหยุ่นและไม่เหมาะเท่ากับ Combine หรือ async/await สำหรับการจัดการ Asynchronous Flows ที่ซับซ้อน
     
-48. อะไรคือ purpose ของ provisioning profile ในการแจกจ่ายแอป iOS
+49. อะไรคือ purpose ของ provisioning profile ในการแจกจ่ายแอป iOS
 
     A. เพิ่มความเร็วแอป
 
@@ -746,7 +796,7 @@
 
     อธิบาย:
 
-49. Bitcode คืออะไร (เมื่อเคยเปิดใช้งาน) และประโยชน์หลักคืออะไร
+50. Bitcode คืออะไร (เมื่อเคยเปิดใช้งาน) และประโยชน์หลักคืออะไร
 
     A. รูปแบบรูปภาพใหม่
 
@@ -760,7 +810,7 @@
 
     อธิบาย:
 
-50. Core Data ใช้เพื่ออะไรหลัก ๆ
+51. Core Data ใช้เพื่ออะไรหลัก ๆ
 
     A. แสดง UI แบบกราฟิก
 
@@ -774,7 +824,7 @@
 
     อธิบาย:
 
-51. ใน Core Data หากทำงานกับ NSManagedObjectContext หลายคอนเท็กซ์ ควรใช้ pattern ใดเพื่อป้องกันปัญหาการแข่งขัน (concurrency)
+52. ใน Core Data หากทำงานกับ NSManagedObjectContext หลายคอนเท็กซ์ ควรใช้ pattern ใดเพื่อป้องกันปัญหาการแข่งขัน (concurrency)
 
     A. เขียนทุกอย่างบน main thread
 
@@ -788,7 +838,7 @@
 
     อธิบาย:
 
-52. อะไรคือ purpose ของ App Transport Security (ATS)
+53. อะไรคือ purpose ของ App Transport Security (ATS)
 
     A. บังคับให้แอปต้องใช้ Dark Mode
 
@@ -802,7 +852,7 @@
 
     อธิบาย:
 
-53. Push notifications บน iOS ใช้บริการใดเป็นตัวส่งจากเซิร์ฟเวอร์ไปยังอุปกรณ์
+54. Push notifications บน iOS ใช้บริการใดเป็นตัวส่งจากเซิร์ฟเวอร์ไปยังอุปกรณ์
 
     A. Firebase Realtime Database
 
@@ -816,7 +866,7 @@
 
     อธิบาย:
     
-54. อะไรคือ difference ระหว่าง Frame และ Bounds ของ UIView
+55. อะไรคือ difference ระหว่าง Frame และ Bounds ของ UIView
 
     A. Frame คือขนาดในระบบพิกัดของ superview; Bounds คือขนาดและออริจินในระบบพิกัดของตัวเอง
 
@@ -830,7 +880,7 @@
 
     อธิบาย:
 
-55. สำหรับการทดสอบ UI อัตโนมัติบน iOS ควรใช้กรอบการทดสอบใดโดยตรง
+56. สำหรับการทดสอบ UI อัตโนมัติบน iOS ควรใช้กรอบการทดสอบใดโดยตรง
 
     A. XCTest + XCUITest
 
@@ -844,7 +894,7 @@
 
     อธิบาย:
 
-56. เมื่อจะเข้ารหัสข้อมูลลับเช่น token บนเครื่อง ควรเก็บที่ไหนเพื่อความปลอดภัยสูงสุด
+57. เมื่อจะเข้ารหัสข้อมูลลับเช่น token บนเครื่อง ควรเก็บที่ไหนเพื่อความปลอดภัยสูงสุด
 
     A. UserDefaults
 
@@ -858,7 +908,7 @@
 
     อธิบาย:
 
-57. อะไรเป็นสาเหตุหลักที่แอปถูกปฏิเสธจาก App Store ในเรื่องสิทธิ์ (entitlements)
+58. อะไรเป็นสาเหตุหลักที่แอปถูกปฏิเสธจาก App Store ในเรื่องสิทธิ์ (entitlements)
 
     A. ใช้สี UI ไม่ถูกต้อง
 
@@ -872,7 +922,7 @@
 
     อธิบาย:
     
-58. อะไรคือ SceneDelegate (iOS 13+) ทำหน้าที่อะไรที่แตกต่างจาก AppDelegate
+59. อะไรคือ SceneDelegate (iOS 13+) ทำหน้าที่อะไรที่แตกต่างจาก AppDelegate
 
     A. จัดการ lifecycle ของ UI ในระดับ scene (หลายหน้าต่าง) ขณะที่ AppDelegate ยังคงจัดการเหตุการณ์ระดับแอป เช่น launch, notifications
 
@@ -886,7 +936,7 @@
 
     อธิบาย:
 
-59. เมื่อใช้ URLSession เพื่อดาวน์โหลดไฟล์ขนาดใหญ่ใน background ต้องใช้ configuration แบบใด
+60. เมื่อใช้ URLSession เพื่อดาวน์โหลดไฟล์ขนาดใหญ่ใน background ต้องใช้ configuration แบบใด
 
     A. defaultSessionConfiguration
 
@@ -900,7 +950,7 @@
 
     อธิบาย:
 
-60. อะไรคือ purpose ของ provisioning certificate (signing certificate) ใน iOS dev flow
+61. อะไรคือ purpose ของ provisioning certificate (signing certificate) ใน iOS dev flow
 
     A. สร้าง UI อัตโนมัติ
 
@@ -914,7 +964,7 @@
 
     อธิบาย:
 
-61. อะไรคือ main advantage ของ Swift structs เทียบกับ classes
+62. อะไรคือ main advantage ของ Swift structs เทียบกับ classes
 
     A. structs เป็น reference type; classes เป็น value type
     
@@ -928,7 +978,7 @@
 
     อธิบาย:
     
-62. สำหรับการจัดการ memory leak ที่เกิดจาก retain cycle ระหว่าง closure และ self วิธีแก้ที่แนะนำคืออะไร
+63. สำหรับการจัดการ memory leak ที่เกิดจาก retain cycle ระหว่าง closure และ self วิธีแก้ที่แนะนำคืออะไร
 
     A. ใช้ strong self ตลอด
 
@@ -942,7 +992,7 @@
 
     อธิบาย:
 
-63. อะไรคือข้อแตกต่างสำคัญระหว่าง synchronous และ asynchronous Dispatch queues บน GCD
+64. อะไรคือข้อแตกต่างสำคัญระหว่าง synchronous และ asynchronous Dispatch queues บน GCD
 
     A. synchronous ไม่ block thread; asynchronous block thread
 
@@ -956,7 +1006,7 @@
 
     อธิบาย:
 
-64. App thinning ประกอบด้วยอะไรบ้าง (App Slicing, Bitcode, On-demand resources) — ข้อใดถูกต้องเกี่ยวกับ App Slicing
+65. App thinning ประกอบด้วยอะไรบ้าง (App Slicing, Bitcode, On-demand resources) — ข้อใดถูกต้องเกี่ยวกับ App Slicing
 
     A. แยกแอปเป็นหลาย APK เหมือน Android
 
@@ -970,7 +1020,7 @@
 
     อธิบาย:
     
-65. การใช้งาน Combine framework เหมาะกับกรณีใด
+66. การใช้งาน Combine framework เหมาะกับกรณีใด
 
     A. แค่จัดการ database แบบ synchronous
 
@@ -984,7 +1034,7 @@
 
     อธิบาย:
 
-66. ในแง่ของ Accessibility: อะไรคือสิ่งที่ผู้พัฒนาควรทำเพื่อรองรับ VoiceOver
+67. ในแง่ของ Accessibility: อะไรคือสิ่งที่ผู้พัฒนาควรทำเพื่อรองรับ VoiceOver
 
     A. ไม่ต้องทำอะไรเลย
 
@@ -998,7 +1048,7 @@
 
     อธิบาย:
 
-67. TestFlight ใช้สำหรับอะไรใน workflow ของ iOS app
+68. TestFlight ใช้สำหรับอะไรใน workflow ของ iOS app
 
     A. ส่งแอปขึ้น App Store โดยตรง
 
@@ -1012,7 +1062,7 @@
 
     อธิบาย:
 
-68. อะไรคือข้อดีของการใช้ Instruments (Time Profiler, Allocations, Leaks) ขณะพัฒนาแอป
+69. อะไรคือข้อดีของการใช้ Instruments (Time Profiler, Allocations, Leaks) ขณะพัฒนาแอป
 
     A. ทำให้แอปรันช้าลงเสมอ
 
@@ -1026,7 +1076,7 @@
 
     อธิบาย:
     
-69. อะไรคือเหตุผลที่ควรใช้ URLSessionTaskDelegate เมื่อจัดการ downloads/uploads
+70. อะไรคือเหตุผลที่ควรใช้ URLSessionTaskDelegate เมื่อจัดการ downloads/uploads
 
     A. เพื่อวาด UI
 
@@ -1040,7 +1090,7 @@
 
     อธิบาย:
     
-70. อะไรคือ primary responsibility ของ Accessibility Identifier ในการทดสอบ UI
+71. อะไรคือ primary responsibility ของ Accessibility Identifier ในการทดสอบ UI
 
     A. จัดการขนาดฟอนต์
 
@@ -1054,7 +1104,7 @@
 
     อธิบาย:
 
-71. อะไรคือประโยชน์ของการใช้ Codable ใน Swift
+72. อะไรคือประโยชน์ของการใช้ Codable ใน Swift
 
     A. สร้าง UI อัตโนมัติ
 
@@ -1068,7 +1118,7 @@
 
     อธิบาย:
 
-72. อะไรคือ potential pitfall เมื่อใช้ DispatchQueue.main.sync จาก background thread ที่เรียกมาจาก main thread (direct or indirect)
+73. อะไรคือ potential pitfall เมื่อใช้ DispatchQueue.main.sync จาก background thread ที่เรียกมาจาก main thread (direct or indirect)
 
     A. ไม่มีปัญหาใด ๆ
 
@@ -1082,7 +1132,7 @@
 
     อธิบาย:
 
-73. สำหรับแอปที่ต้องการเล่นเสียงต่อเนื่องใน background (เช่น music app) ต้องเปิด capability ใดใน Xcode แล้วกำหนดอะไรใน Info.plist
+74. สำหรับแอปที่ต้องการเล่นเสียงต่อเนื่องใน background (เช่น music app) ต้องเปิด capability ใดใน Xcode แล้วกำหนดอะไรใน Info.plist
 
     A. Background Modes → เลือก “Audio, AirPlay, and Picture in Picture” และตั้งค่า Info.plist ให้มีค่าที่เกี่ยวข้อง (เช่น UIBackgroundModes)
 
@@ -1096,7 +1146,7 @@
 
     อธิบาย:
 
-74. โครงสร้างของระบบปฏิบัติการ iOS แบ่งออกเป็นกี่ชั้น (Layers)
+75. โครงสร้างของระบบปฏิบัติการ iOS แบ่งออกเป็นกี่ชั้น (Layers)
 
     A. 2 ชั้น
 
@@ -1110,7 +1160,7 @@
 
     อธิบาย:
 
-75. ชั้นบนสุดของสถาปัตยกรรม iOS คืออะไร
+76. ชั้นบนสุดของสถาปัตยกรรม iOS คืออะไร
 
     A. Core OS
 
@@ -1124,7 +1174,7 @@
 
     อธิบาย:
 
-76. ชั้นล่างสุดของ iOS architecture คืออะไร
+77. ชั้นล่างสุดของ iOS architecture คืออะไร
 
     A. Cocoa Touch
 
@@ -1138,7 +1188,7 @@
 
     อธิบาย:
 
-77. ชั้น Cocoa Touch มีหน้าที่หลักคืออะไร
+78. ชั้น Cocoa Touch มีหน้าที่หลักคืออะไร
 
     A. จัดการ API สำหรับ UI และการโต้ตอบกับผู้ใช้
 
@@ -1152,7 +1202,7 @@
 
     อธิบาย:
 
-78. UIKit Framework อยู่ในชั้นใดของ iOS architecture
+79. UIKit Framework อยู่ในชั้นใดของ iOS architecture
 
     A. Core OS
 
@@ -1166,7 +1216,7 @@
 
     อธิบาย:
 
-79. ชั้น Media Layer ใช้สำหรับอะไร
+80. ชั้น Media Layer ใช้สำหรับอะไร
 
     A. การจัดการเสียง ภาพ วิดีโอ และกราฟิก
 
@@ -1180,7 +1230,7 @@
 
     อธิบาย:
 
-80. Core Animation และ Core Graphics อยู่ในชั้นใด
+81. Core Animation และ Core Graphics อยู่ในชั้นใด
 
     A. Cocoa Touch
 
@@ -1194,7 +1244,7 @@
 
     อธิบาย:
 
-81. Core Services layer มีหน้าที่ใดต่อไปนี้
+82. Core Services layer มีหน้าที่ใดต่อไปนี้
 
     A. จัดการการแสดงผลภาพ
 
@@ -1208,7 +1258,7 @@
 
     อธิบาย:
 
-82. Core Data Framework อยู่ในชั้นใดของสถาปัตยกรรม iOS
+83. Core Data Framework อยู่ในชั้นใดของสถาปัตยกรรม iOS
 
     A. Cocoa Touch
     
@@ -1222,7 +1272,7 @@
 
     อธิบาย:
 
-83. ชั้น Core OS (หรือ Darwin Layer) มีหน้าที่หลักอะไร
+84. ชั้น Core OS (หรือ Darwin Layer) มีหน้าที่หลักอะไร
 
     A. ควบคุมระดับฮาร์ดแวร์และระบบไฟล์
 
@@ -1236,7 +1286,7 @@
 
     อธิบาย:
 
-84. iOS Kernel มีพื้นฐานมาจากระบบใด
+85. iOS Kernel มีพื้นฐานมาจากระบบใด
 
     A. Linux Kernel
 
@@ -1250,7 +1300,7 @@
 
     อธิบาย:
 
-85. ระบบไฟล์ที่ iOS ใช้ในปัจจุบันคืออะไร
+86. ระบบไฟล์ที่ iOS ใช้ในปัจจุบันคืออะไร
 
     A. FAT32
 
@@ -1264,7 +1314,7 @@
 
     อธิบาย:
 
-86. Layer ใดของ iOS ที่เกี่ยวข้องกับการติดต่อระหว่างแอปและผู้ใช้ (User Interaction)
+87. Layer ใดของ iOS ที่เกี่ยวข้องกับการติดต่อระหว่างแอปและผู้ใช้ (User Interaction)
 
     A. Cocoa Touch
 
@@ -1278,7 +1328,7 @@
 
     อธิบาย:
 
-87. Framework ใดใช้สำหรับแสดงผลภาพ 2D ใน iOS
+88. Framework ใดใช้สำหรับแสดงผลภาพ 2D ใน iOS
 
     A. Core Graphics
 
@@ -1292,7 +1342,7 @@
 
     อธิบาย:
 
-88. Core Audio อยู่ใน Layer ใดของ iOS
+89. Core Audio อยู่ใน Layer ใดของ iOS
 
     A. Cocoa Touch
 
@@ -1306,7 +1356,7 @@
 
     อธิบาย:
 
-89. UIKit มีคลาสสำคัญใดสำหรับควบคุมหน้าจอแต่ละหน้าในแอป
+90. UIKit มีคลาสสำคัญใดสำหรับควบคุมหน้าจอแต่ละหน้าในแอป
 
     A. UIView
     
@@ -1320,7 +1370,7 @@
 
     อธิบาย:
 
-90. SpriteKit และ SceneKit ใช้สำหรับทำอะไร
+91. SpriteKit และ SceneKit ใช้สำหรับทำอะไร
 
     A. พัฒนาเกมและกราฟิกแบบ 2D/3D
     
@@ -1334,7 +1384,7 @@
 
     อธิบาย:
 
-91. Core Location Framework ใช้สำหรับอะไร
+92. Core Location Framework ใช้สำหรับอะไร
 
     A. ตรวจจับตำแหน่งของอุปกรณ์ (GPS)
 
@@ -1348,7 +1398,7 @@
 
     อธิบาย:
 
-92. Framework ใดใน iOS ที่เกี่ยวข้องกับการจัดการข้อมูลแบบฐานข้อมูล SQL
+93. Framework ใดใน iOS ที่เกี่ยวข้องกับการจัดการข้อมูลแบบฐานข้อมูล SQL
 
     A. Core Location
     
@@ -1362,7 +1412,7 @@
 
     อธิบาย:
 
-93. ใน iOS, Foundation Framework อยู่ใน Layer ใด
+94. ใน iOS, Foundation Framework อยู่ใน Layer ใด
 
     A. Core OS
 
@@ -1376,7 +1426,7 @@
 
     อธิบาย:
 
-94. ระบบความปลอดภัยและการเข้ารหัสอยู่ใน Layer ใด
+95. ระบบความปลอดภัยและการเข้ารหัสอยู่ใน Layer ใด
 
     A. Core Services และ Core OS
 
@@ -1390,7 +1440,7 @@
 
     อธิบาย:
 
-95. Multitasking และ Memory Management อยู่ใน Layer ใด
+96. Multitasking และ Memory Management อยู่ใน Layer ใด
 
     A. Cocoa Touch
 
@@ -1404,7 +1454,7 @@
 
     อธิบาย:
 
-96. Objective-C Runtime อยู่ใน Layer ไหนของ iOS
+97. Objective-C Runtime อยู่ใน Layer ไหนของ iOS
 
     A. Cocoa Touch
 
@@ -1418,7 +1468,7 @@
 
     อธิบาย:
 
-97. Accelerate Framework ใช้ทำอะไร
+98. Accelerate Framework ใช้ทำอะไร
 
     A. ประมวลผลข้อมูลตัวเลข, เวกเตอร์, และสัญญาณความเร็วสูง
 
@@ -1432,7 +1482,7 @@
 
     อธิบาย:
 
-98. AVFoundation Framework ใช้เพื่ออะไร
+99. AVFoundation Framework ใช้เพื่ออะไร
 
     A. จัดการภาพเคลื่อนไหวและเสียง
 
@@ -1446,7 +1496,7 @@
 
     อธิบาย:
 
-99. Core Motion Framework อยู่ใน Layer ใดของ iOS
+100. Core Motion Framework อยู่ใน Layer ใดของ iOS
 
     A. Cocoa Touch
 
@@ -1460,7 +1510,7 @@
 
     อธิบาย:
 
-100. UIKit Framework มีองค์ประกอบใดบ้าง
+101. UIKit Framework มีองค์ประกอบใดบ้าง
 
     A. ปุ่ม (UIButton), ป้ายข้อความ (UILabel), กล่องข้อความ (UITextField)
 
