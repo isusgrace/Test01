@@ -834,11 +834,31 @@
 
     D. ไม่สนใจ concurrency
 
-    คำตอบ:
+    คำตอบ: B
 
-    อธิบาย:
+    อธิบาย: Core Data คือ Framework ที่ Apple จัดเตรียมไว้ให้สำหรับการจัดการกับ Object Graph (กลุ่มของอ็อบเจกต์ที่เชื่อมโยงกัน) ของแอปพลิเคชัน และสำหรับการจัดเก็บข้อมูลนั้นๆ อย่างถาวร (Persistence) บนอุปกรณ์ iOS, macOS, watchOS, และ tvOS
 
-53. อะไรคือ purpose ของ App Transport Security (ATS)
+           กล่าวอีกนัยหนึ่ง Core Data ทำหน้าที่คล้ายกับ ORM (Object-Relational Mapping) แม้ว่า Core Data จะไม่ได้เป็น ORM เต็มรูปแบบในความหมายดั้งเดิม (เพราะมันไม่ได้จำกัดอยู่แค่การทำงานกับฐานข้อมูลเชิงสัมพันธ์เท่านั้น) แต่ก็ทำหน้าที่แปลงข้อมูลที่จัดเก็บไว้ (มักจะเป็น SQLite) ให้กลับมาเป็นอ็อบเจกต์ (Objects) ในหน่วยความจำของแอปพลิเคชัน และจัดการวงจรชีวิตของอ็อบเจกต์เหล่านั้น
+
+           หน้าที่หลักของ Core Data:
+
+           - Persistence (การจัดเก็บข้อมูลถาวร): ช่วยให้นักพัฒนาสามารถบันทึกข้อมูลของแอปพลิเคชัน (เช่น ข้อมูลผู้ใช้, รายการสิ่งที่ต้องทำ, การตั้งค่า) ลงในดิสก์ของอุปกรณ์ เพื่อให้ข้อมูลยังคงอยู่แม้ว่าผู้ใช้จะปิดแอปไปแล้ว
+
+           - Object Graph Management: Core Data จัดการกับความสัมพันธ์และสถานะของอ็อบเจกต์ต่างๆ ในหน่วยความจำ (เช่น อ็อบเจกต์ "ลูกค้า" เชื่อมโยงกับอ็อบเจกต์ "คำสั่งซื้อ" หลายรายการ)
+
+           - Undo/Redo Support: มีกลไกในตัวสำหรับการรองรับการยกเลิกและการทำซ้ำการเปลี่ยนแปลงข้อมูล
+
+           - Fetching and Filtering (การดึงและการกรองข้อมูล): จัดการกับการสอบถาม (Query) ข้อมูลที่จัดเก็บไว้ด้วยวิธีที่มีประสิทธิภาพ (เช่น การใช้ NSFetchRequest)
+
+           เหตุผลที่ตัวเลือกอื่นไม่ถูกต้อง:
+ 
+           - A. แสดง UI แบบกราฟิก: เป็นหน้าที่ของเฟรมเวิร์ก UIKit หรือ SwiftUI
+
+           - C. จัดการการเชื่อมต่อ Bluetooth: เป็นหน้าที่ของเฟรมเวิร์ก Core Bluetooth
+
+           - D. ทำ animation: เป็นหน้าที่ของเฟรมเวิร์ก Core Animation หรือ UIKit/SwiftUI
+
+54. อะไรคือ purpose ของ App Transport Security (ATS)
 
     A. บังคับให้แอปต้องใช้ Dark Mode
 
@@ -852,7 +872,7 @@
 
     อธิบาย:
 
-54. Push notifications บน iOS ใช้บริการใดเป็นตัวส่งจากเซิร์ฟเวอร์ไปยังอุปกรณ์
+55. Push notifications บน iOS ใช้บริการใดเป็นตัวส่งจากเซิร์ฟเวอร์ไปยังอุปกรณ์
 
     A. Firebase Realtime Database
 
@@ -866,7 +886,7 @@
 
     อธิบาย:
     
-55. อะไรคือ difference ระหว่าง Frame และ Bounds ของ UIView
+56. อะไรคือ difference ระหว่าง Frame และ Bounds ของ UIView
 
     A. Frame คือขนาดในระบบพิกัดของ superview; Bounds คือขนาดและออริจินในระบบพิกัดของตัวเอง
 
@@ -880,7 +900,7 @@
 
     อธิบาย:
 
-56. สำหรับการทดสอบ UI อัตโนมัติบน iOS ควรใช้กรอบการทดสอบใดโดยตรง
+57. สำหรับการทดสอบ UI อัตโนมัติบน iOS ควรใช้กรอบการทดสอบใดโดยตรง
 
     A. XCTest + XCUITest
 
@@ -894,7 +914,7 @@
 
     อธิบาย:
 
-57. เมื่อจะเข้ารหัสข้อมูลลับเช่น token บนเครื่อง ควรเก็บที่ไหนเพื่อความปลอดภัยสูงสุด
+58. เมื่อจะเข้ารหัสข้อมูลลับเช่น token บนเครื่อง ควรเก็บที่ไหนเพื่อความปลอดภัยสูงสุด
 
     A. UserDefaults
 
@@ -908,7 +928,7 @@
 
     อธิบาย:
 
-58. อะไรเป็นสาเหตุหลักที่แอปถูกปฏิเสธจาก App Store ในเรื่องสิทธิ์ (entitlements)
+59. อะไรเป็นสาเหตุหลักที่แอปถูกปฏิเสธจาก App Store ในเรื่องสิทธิ์ (entitlements)
 
     A. ใช้สี UI ไม่ถูกต้อง
 
@@ -922,7 +942,7 @@
 
     อธิบาย:
     
-59. อะไรคือ SceneDelegate (iOS 13+) ทำหน้าที่อะไรที่แตกต่างจาก AppDelegate
+60. อะไรคือ SceneDelegate (iOS 13+) ทำหน้าที่อะไรที่แตกต่างจาก AppDelegate
 
     A. จัดการ lifecycle ของ UI ในระดับ scene (หลายหน้าต่าง) ขณะที่ AppDelegate ยังคงจัดการเหตุการณ์ระดับแอป เช่น launch, notifications
 
@@ -936,7 +956,7 @@
 
     อธิบาย:
 
-60. เมื่อใช้ URLSession เพื่อดาวน์โหลดไฟล์ขนาดใหญ่ใน background ต้องใช้ configuration แบบใด
+61. เมื่อใช้ URLSession เพื่อดาวน์โหลดไฟล์ขนาดใหญ่ใน background ต้องใช้ configuration แบบใด
 
     A. defaultSessionConfiguration
 
@@ -950,7 +970,7 @@
 
     อธิบาย:
 
-61. อะไรคือ purpose ของ provisioning certificate (signing certificate) ใน iOS dev flow
+62. อะไรคือ purpose ของ provisioning certificate (signing certificate) ใน iOS dev flow
 
     A. สร้าง UI อัตโนมัติ
 
@@ -964,7 +984,7 @@
 
     อธิบาย:
 
-62. อะไรคือ main advantage ของ Swift structs เทียบกับ classes
+63. อะไรคือ main advantage ของ Swift structs เทียบกับ classes
 
     A. structs เป็น reference type; classes เป็น value type
     
@@ -978,7 +998,7 @@
 
     อธิบาย:
     
-63. สำหรับการจัดการ memory leak ที่เกิดจาก retain cycle ระหว่าง closure และ self วิธีแก้ที่แนะนำคืออะไร
+64. สำหรับการจัดการ memory leak ที่เกิดจาก retain cycle ระหว่าง closure และ self วิธีแก้ที่แนะนำคืออะไร
 
     A. ใช้ strong self ตลอด
 
@@ -992,7 +1012,7 @@
 
     อธิบาย:
 
-64. อะไรคือข้อแตกต่างสำคัญระหว่าง synchronous และ asynchronous Dispatch queues บน GCD
+65. อะไรคือข้อแตกต่างสำคัญระหว่าง synchronous และ asynchronous Dispatch queues บน GCD
 
     A. synchronous ไม่ block thread; asynchronous block thread
 
@@ -1006,7 +1026,7 @@
 
     อธิบาย:
 
-65. App thinning ประกอบด้วยอะไรบ้าง (App Slicing, Bitcode, On-demand resources) — ข้อใดถูกต้องเกี่ยวกับ App Slicing
+66. App thinning ประกอบด้วยอะไรบ้าง (App Slicing, Bitcode, On-demand resources) — ข้อใดถูกต้องเกี่ยวกับ App Slicing
 
     A. แยกแอปเป็นหลาย APK เหมือน Android
 
@@ -1020,7 +1040,7 @@
 
     อธิบาย:
     
-66. การใช้งาน Combine framework เหมาะกับกรณีใด
+67. การใช้งาน Combine framework เหมาะกับกรณีใด
 
     A. แค่จัดการ database แบบ synchronous
 
@@ -1034,7 +1054,7 @@
 
     อธิบาย:
 
-67. ในแง่ของ Accessibility: อะไรคือสิ่งที่ผู้พัฒนาควรทำเพื่อรองรับ VoiceOver
+68. ในแง่ของ Accessibility: อะไรคือสิ่งที่ผู้พัฒนาควรทำเพื่อรองรับ VoiceOver
 
     A. ไม่ต้องทำอะไรเลย
 
@@ -1048,7 +1068,7 @@
 
     อธิบาย:
 
-68. TestFlight ใช้สำหรับอะไรใน workflow ของ iOS app
+69. TestFlight ใช้สำหรับอะไรใน workflow ของ iOS app
 
     A. ส่งแอปขึ้น App Store โดยตรง
 
@@ -1062,7 +1082,7 @@
 
     อธิบาย:
 
-69. อะไรคือข้อดีของการใช้ Instruments (Time Profiler, Allocations, Leaks) ขณะพัฒนาแอป
+70. อะไรคือข้อดีของการใช้ Instruments (Time Profiler, Allocations, Leaks) ขณะพัฒนาแอป
 
     A. ทำให้แอปรันช้าลงเสมอ
 
@@ -1076,7 +1096,7 @@
 
     อธิบาย:
     
-70. อะไรคือเหตุผลที่ควรใช้ URLSessionTaskDelegate เมื่อจัดการ downloads/uploads
+71. อะไรคือเหตุผลที่ควรใช้ URLSessionTaskDelegate เมื่อจัดการ downloads/uploads
 
     A. เพื่อวาด UI
 
@@ -1090,7 +1110,7 @@
 
     อธิบาย:
     
-71. อะไรคือ primary responsibility ของ Accessibility Identifier ในการทดสอบ UI
+72. อะไรคือ primary responsibility ของ Accessibility Identifier ในการทดสอบ UI
 
     A. จัดการขนาดฟอนต์
 
@@ -1104,7 +1124,7 @@
 
     อธิบาย:
 
-72. อะไรคือประโยชน์ของการใช้ Codable ใน Swift
+73. อะไรคือประโยชน์ของการใช้ Codable ใน Swift
 
     A. สร้าง UI อัตโนมัติ
 
@@ -1118,7 +1138,7 @@
 
     อธิบาย:
 
-73. อะไรคือ potential pitfall เมื่อใช้ DispatchQueue.main.sync จาก background thread ที่เรียกมาจาก main thread (direct or indirect)
+74. อะไรคือ potential pitfall เมื่อใช้ DispatchQueue.main.sync จาก background thread ที่เรียกมาจาก main thread (direct or indirect)
 
     A. ไม่มีปัญหาใด ๆ
 
@@ -1132,7 +1152,7 @@
 
     อธิบาย:
 
-74. สำหรับแอปที่ต้องการเล่นเสียงต่อเนื่องใน background (เช่น music app) ต้องเปิด capability ใดใน Xcode แล้วกำหนดอะไรใน Info.plist
+75. สำหรับแอปที่ต้องการเล่นเสียงต่อเนื่องใน background (เช่น music app) ต้องเปิด capability ใดใน Xcode แล้วกำหนดอะไรใน Info.plist
 
     A. Background Modes → เลือก “Audio, AirPlay, and Picture in Picture” และตั้งค่า Info.plist ให้มีค่าที่เกี่ยวข้อง (เช่น UIBackgroundModes)
 
@@ -1146,7 +1166,7 @@
 
     อธิบาย:
 
-75. โครงสร้างของระบบปฏิบัติการ iOS แบ่งออกเป็นกี่ชั้น (Layers)
+76. โครงสร้างของระบบปฏิบัติการ iOS แบ่งออกเป็นกี่ชั้น (Layers)
 
     A. 2 ชั้น
 
@@ -1160,7 +1180,7 @@
 
     อธิบาย:
 
-76. ชั้นบนสุดของสถาปัตยกรรม iOS คืออะไร
+77. ชั้นบนสุดของสถาปัตยกรรม iOS คืออะไร
 
     A. Core OS
 
@@ -1174,7 +1194,7 @@
 
     อธิบาย:
 
-77. ชั้นล่างสุดของ iOS architecture คืออะไร
+78. ชั้นล่างสุดของ iOS architecture คืออะไร
 
     A. Cocoa Touch
 
@@ -1188,7 +1208,7 @@
 
     อธิบาย:
 
-78. ชั้น Cocoa Touch มีหน้าที่หลักคืออะไร
+79. ชั้น Cocoa Touch มีหน้าที่หลักคืออะไร
 
     A. จัดการ API สำหรับ UI และการโต้ตอบกับผู้ใช้
 
@@ -1202,7 +1222,7 @@
 
     อธิบาย:
 
-79. UIKit Framework อยู่ในชั้นใดของ iOS architecture
+80. UIKit Framework อยู่ในชั้นใดของ iOS architecture
 
     A. Core OS
 
@@ -1216,7 +1236,7 @@
 
     อธิบาย:
 
-80. ชั้น Media Layer ใช้สำหรับอะไร
+81. ชั้น Media Layer ใช้สำหรับอะไร
 
     A. การจัดการเสียง ภาพ วิดีโอ และกราฟิก
 
@@ -1230,7 +1250,7 @@
 
     อธิบาย:
 
-81. Core Animation และ Core Graphics อยู่ในชั้นใด
+82. Core Animation และ Core Graphics อยู่ในชั้นใด
 
     A. Cocoa Touch
 
@@ -1244,7 +1264,7 @@
 
     อธิบาย:
 
-82. Core Services layer มีหน้าที่ใดต่อไปนี้
+83. Core Services layer มีหน้าที่ใดต่อไปนี้
 
     A. จัดการการแสดงผลภาพ
 
@@ -1258,7 +1278,7 @@
 
     อธิบาย:
 
-83. Core Data Framework อยู่ในชั้นใดของสถาปัตยกรรม iOS
+84. Core Data Framework อยู่ในชั้นใดของสถาปัตยกรรม iOS
 
     A. Cocoa Touch
     
@@ -1272,7 +1292,7 @@
 
     อธิบาย:
 
-84. ชั้น Core OS (หรือ Darwin Layer) มีหน้าที่หลักอะไร
+85. ชั้น Core OS (หรือ Darwin Layer) มีหน้าที่หลักอะไร
 
     A. ควบคุมระดับฮาร์ดแวร์และระบบไฟล์
 
@@ -1286,7 +1306,7 @@
 
     อธิบาย:
 
-85. iOS Kernel มีพื้นฐานมาจากระบบใด
+86. iOS Kernel มีพื้นฐานมาจากระบบใด
 
     A. Linux Kernel
 
@@ -1300,7 +1320,7 @@
 
     อธิบาย:
 
-86. ระบบไฟล์ที่ iOS ใช้ในปัจจุบันคืออะไร
+87. ระบบไฟล์ที่ iOS ใช้ในปัจจุบันคืออะไร
 
     A. FAT32
 
@@ -1314,7 +1334,7 @@
 
     อธิบาย:
 
-87. Layer ใดของ iOS ที่เกี่ยวข้องกับการติดต่อระหว่างแอปและผู้ใช้ (User Interaction)
+88. Layer ใดของ iOS ที่เกี่ยวข้องกับการติดต่อระหว่างแอปและผู้ใช้ (User Interaction)
 
     A. Cocoa Touch
 
@@ -1328,7 +1348,7 @@
 
     อธิบาย:
 
-88. Framework ใดใช้สำหรับแสดงผลภาพ 2D ใน iOS
+89. Framework ใดใช้สำหรับแสดงผลภาพ 2D ใน iOS
 
     A. Core Graphics
 
@@ -1342,7 +1362,7 @@
 
     อธิบาย:
 
-89. Core Audio อยู่ใน Layer ใดของ iOS
+90. Core Audio อยู่ใน Layer ใดของ iOS
 
     A. Cocoa Touch
 
@@ -1356,7 +1376,7 @@
 
     อธิบาย:
 
-90. UIKit มีคลาสสำคัญใดสำหรับควบคุมหน้าจอแต่ละหน้าในแอป
+91. UIKit มีคลาสสำคัญใดสำหรับควบคุมหน้าจอแต่ละหน้าในแอป
 
     A. UIView
     
@@ -1370,7 +1390,7 @@
 
     อธิบาย:
 
-91. SpriteKit และ SceneKit ใช้สำหรับทำอะไร
+92. SpriteKit และ SceneKit ใช้สำหรับทำอะไร
 
     A. พัฒนาเกมและกราฟิกแบบ 2D/3D
     
@@ -1384,7 +1404,7 @@
 
     อธิบาย:
 
-92. Core Location Framework ใช้สำหรับอะไร
+93. Core Location Framework ใช้สำหรับอะไร
 
     A. ตรวจจับตำแหน่งของอุปกรณ์ (GPS)
 
@@ -1398,7 +1418,7 @@
 
     อธิบาย:
 
-93. Framework ใดใน iOS ที่เกี่ยวข้องกับการจัดการข้อมูลแบบฐานข้อมูล SQL
+94. Framework ใดใน iOS ที่เกี่ยวข้องกับการจัดการข้อมูลแบบฐานข้อมูล SQL
 
     A. Core Location
     
@@ -1412,7 +1432,7 @@
 
     อธิบาย:
 
-94. ใน iOS, Foundation Framework อยู่ใน Layer ใด
+95. ใน iOS, Foundation Framework อยู่ใน Layer ใด
 
     A. Core OS
 
@@ -1426,7 +1446,7 @@
 
     อธิบาย:
 
-95. ระบบความปลอดภัยและการเข้ารหัสอยู่ใน Layer ใด
+96. ระบบความปลอดภัยและการเข้ารหัสอยู่ใน Layer ใด
 
     A. Core Services และ Core OS
 
@@ -1440,7 +1460,7 @@
 
     อธิบาย:
 
-96. Multitasking และ Memory Management อยู่ใน Layer ใด
+97. Multitasking และ Memory Management อยู่ใน Layer ใด
 
     A. Cocoa Touch
 
@@ -1454,7 +1474,7 @@
 
     อธิบาย:
 
-97. Objective-C Runtime อยู่ใน Layer ไหนของ iOS
+98. Objective-C Runtime อยู่ใน Layer ไหนของ iOS
 
     A. Cocoa Touch
 
@@ -1468,7 +1488,7 @@
 
     อธิบาย:
 
-98. Accelerate Framework ใช้ทำอะไร
+99. Accelerate Framework ใช้ทำอะไร
 
     A. ประมวลผลข้อมูลตัวเลข, เวกเตอร์, และสัญญาณความเร็วสูง
 
@@ -1482,7 +1502,7 @@
 
     อธิบาย:
 
-99. AVFoundation Framework ใช้เพื่ออะไร
+100. AVFoundation Framework ใช้เพื่ออะไร
 
     A. จัดการภาพเคลื่อนไหวและเสียง
 
@@ -1496,7 +1516,7 @@
 
     อธิบาย:
 
-100. Core Motion Framework อยู่ใน Layer ใดของ iOS
+101. Core Motion Framework อยู่ใน Layer ใดของ iOS
 
     A. Cocoa Touch
 
