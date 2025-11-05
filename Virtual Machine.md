@@ -514,7 +514,27 @@
 
     คำตอบ: B
 
-    อธิบาย: Nested snapshots เป็น chain ของ differencing disks — ทำให้ I/O ช้าลงเพราะต้องเดิน chain, ใช้พื้นที่เก็บเพิ่ม และการ consolidate/merge จะซับซ้อนและเสี่ยงต่อการเสียหาย
+    อธิบาย: Nested Snapshot (สแนปช็อตแบบซ้อนกัน) คือการสร้างสแนปช็อตของ Virtual Machine (VM) ซ้ำ ๆ ต่อเนื่องกันไป ซึ่งแต่ละสแนปช็อตจะอ้างอิงถึงสถานะของสแนปช็อตก่อนหน้า ปัญหาหลักที่ตามมาจากการทำสแนปช็อตหลายชั้น คือผลกระทบต่อ พื้นที่จัดเก็บข้อมูล และประสิทธิภาพการทำงาน
+
+           1. การใช้พื้นที่ Disk อย่างมหาศาล
+
+              - หลักการทำงาน: สแนปช็อตไม่ได้คัดลอกไฟล์ดิสก์หลักทั้งหมด แต่จะสร้างไฟล์ Delta Disk หรือ Redo Log ใหม่
+
+              - ปัญหา: ไฟล์ Delta Disk เหล่านี้จะบันทึกเฉพาะข้อมูลที่มีการเปลี่ยนแปลง (Writes) หลังจากที่สร้างสแนปช็อตนั้น ๆ เมื่อคุณทำสแนปช็อตหลายชั้นติดกัน จะมีไฟล์ Delta Disk สะสมเพิ่มขึ้นเรื่อย ๆ ส่งผลให้ ใช้พื้นที่จัดเก็บข้อมูลจริงบน Host (Hypervisor) มากขึ้นอย่างรวดเร็ว โดยเฉพาะเมื่อ VM มีการใช้งาน I/O สูง
+
+           2. การลดประสิทธิภาพ I/O (Input/Output)
+
+              - หลักการทำงาน: เมื่อ VM ถูกเรียกใช้งานในสถานะสแนปช็อต ระบบจะต้องอ่านข้อมูลผ่านไฟล์ Delta Disk หลายชั้นย้อนกลับไปจนถึงไฟล์ดิสก์หลัก (Base Disk)
+
+              - ปัญหา: ทุกการอ่านข้อมูล (Read) จะต้องผ่านกระบวนการ Traversal หรือการค้นหาย้อนหลังผ่านไฟล์ Delta Disk ที่ซ้อนกันหลายชั้น ทำให้เกิดความซับซ้อนและเพิ่มเวลาหน่วง (Latency) ในการเข้าถึงข้อมูล ลดประสิทธิภาพ I/O ของ VM ลงอย่างเห็นได้ชัด
+
+           ❌ ตัวเลือกอื่น ๆ ที่ไม่ถูกต้อง
+
+               A) ลดความปลอดภัยของ VM: การทำสแนปช็อตเป็นฟีเจอร์การจัดการ ไม่ได้ส่งผลโดยตรงต่อความปลอดภัย (Security) ของระบบ VM
+
+               C) เพิ่มความเร็วการบูต: ตรงกันข้าม การมีสแนปช็อตหลายชั้นมักจะ ลดความเร็วในการทำงาน โดยรวม รวมถึงการบูตด้วย เนื่องจากระบบต้องประมวลผลความเปลี่ยนแปลงของไฟล์จำนวนมาก
+
+               D) ลบ Snapshot เดิมโดยอัตโนมัติ: ระบบส่วนใหญ่ไม่ได้ลบสแนปช็อตเก่าโดยอัตโนมัติ ผู้ดูแลระบบต้องดำเนินการลบเอง (Commit/Consolidate) การลืมลบสแนปช็อตทิ้งไว้เป็นระยะเวลานาน คือสาเหตุหลักของปัญหาพื้นที่ดิสก์เต็มและประสิทธิภาพตกต่ำ
 
 38. การใช้ “vMotion” ของ VMware หรือ “Live Migration” ของ KVM หมายถึงอะไร
 
@@ -528,9 +548,31 @@
 
     คำตอบ: A
 
-    อธิบาย: vMotion / Live Migration คือการ ย้าย VM ระหว่าง hosts โดยแทบไม่หยุดบริการ — ใช้วิธี pre-copy/post-copy เพื่อคัดลอก memory และสถานะ CPU พร้อมจัดการ network/ARP เพื่อให้การเชื่อมต่อแอปยังใช้งานต่อได้
+    อธิบาย: vMotion คือการโยกย้ายเครื่องเสมือนระหว่างเซิร์ฟเวอร์ในขณะที่เครื่องเสมือนกำลังทำงานแบบสด ๆ (ย้ายเครื่องเสมือนจากเซิร์ฟเวอร์หนึ่งไปยังอีกเซิร์ฟเวอร์หนึ่งได้แบบสดๆ ) เราไม่ต้องปิดเครื่องเสมือน ซึ่งหมายความว่าผู้ใช้ระบบปฏิบัติการจะไม่หยุดทำงานหรือถูกรบกวนในระหว่างการโยกย้ายเวิร์กโหลด
 
-39. “NUMA Awareness” มีความสำคัญต่อ VM อย่างไร
+           Live Migration เป็นคำศัพท์ทั่วไปในอุตสาหกรรมการจำลองเสมือน (Virtualization) ในขณะที่ vMotion เป็นชื่อเทคโนโลยีภายใต้เครื่องหมายการค้าของ VMware ซึ่งทั้งสองมีจุดประสงค์เดียวกันคือ:
+
+           1. การย้ายโดยไม่หยุดบริการ (Zero Downtime)
+
+              - หลักการ: กระบวนการนี้จะโอนย้าย สถานะการทำงานทั้งหมด ของ VM ซึ่งรวมถึงหน่วยความจำ (Active Memory), สถานะ CPU (Execution State), และการเชื่อมต่อเครือข่าย ให้ไปยัง Host ใหม่
+
+              - กระบวนการโดยย่อ:
+
+                1. คัดลอกหน่วยความจำส่วนใหญ่ของ VM จาก Host ต้นทางไปยัง Host ปลายทาง
+
+                2. ในช่วงสุดท้าย จะมีการหยุดทำงาน (Stun Time) เพียงชั่ววินาทีเดียว (มักจะน้อยกว่า 1 วินาที) เพื่อคัดลอกหน่วยความจำส่วนที่เปลี่ยนแปลงไปในช่วงเวลาที่ทำการโอนย้าย
+
+                3. VM จะเปิดทำงานต่อบน Host ปลายทางอย่างรวดเร็ว โดยที่เซสชันของแอปพลิเคชันหรือผู้ใช้ยังคงอยู่
+
+           2. จุดประสงค์ในการใช้งาน
+
+              - การบำรุงรักษาฮาร์ดแวร์ (Planned Maintenance): สามารถย้าย VM ออกจากเซิร์ฟเวอร์ที่ต้องการอัปเดตเฟิร์มแวร์หรือซ่อมบำรุงได้โดยไม่ต้องปิด VM
+
+              - การปรับสมดุลภาระงาน (Load Balancing): ใช้เพื่อย้าย VM ที่มีการใช้งานทรัพยากรสูงไปยังเซิร์ฟเวอร์ที่มีทรัพยากรว่างมากกว่า เพื่อให้เกิดการใช้ทรัพยากรอย่างมีประสิทธิภาพทั่วทั้งกลุ่มเซิร์ฟเวอร์ (Cluster)
+
+              - การประหยัดพลังงาน: ย้าย VM ออกจากเซิร์ฟเวอร์ที่มีภาระงานต่ำ เพื่อให้สามารถปิดเซิร์ฟเวอร์นั้น ๆ ได้
+    
+40. “NUMA Awareness” มีความสำคัญต่อ VM อย่างไร
 
     A) เกี่ยวกับการจัดการ Network Bandwidth
 
@@ -544,7 +586,44 @@
 
     อธิบาย: NUMA awareness สำคัญเพราะ host อาจมี NUMA nodes — ถ้าจัด vCPU หรือ memory กระจายข้าม node จะเกิด remote memory access ที่ช้ากว่า local memory การตั้ง affinity/placement จะลด latency และใช้ performance ได้เต็มที่
 
-40. ในระบบ Cloud (เช่น AWS EC2) การเลือก Instance Type เช่น t2.micro หรือ m5.large หมายถึงอะไร
+           NUMA Awareness (การรับรู้ NUMA) เป็นคุณสมบัติที่สำคัญอย่างยิ่งสำหรับ Hypervisor (เช่น VMware ESXi, Hyper-V, KVM) ในการจัดการเครื่องเสมือน (VM) โดยเฉพาะ VM ที่มีขนาดใหญ่และต้องการประสิทธิภาพสูง
+
+           1. เป้าหมาย: ลดการเข้าถึงหน่วยความจำระยะไกล
+
+              ในระบบเซิร์ฟเวอร์สมัยใหม่ที่มีหลายซ็อกเก็ต CPU , แต่ละกลุ่มของ CPU และหน่วยความจำที่เชื่อมต่อกันอย่างใกล้ชิดจะเรียกว่า NUMA Node
+
+              - Local Memory Access: CPU สามารถเข้าถึงหน่วยความจำที่อยู่บน Node ของตัวเองได้ เร็วกว่า
+
+              - Remote Memory Access: การเข้าถึงหน่วยความจำที่อยู่บน Node อื่น (Remote Memory) ต้องเดินทางผ่านลิงก์เชื่อมต่อ (Interconnect Bus) ซึ่งทำให้เกิด ความหน่วง (Latency) สูงขึ้นและใช้แบนด์วิดท์ของระบบ
+
+            NUMA Awareness ของ Hypervisor จึงมุ่งเน้นการจัดสรรทรัพยากรเพื่อให้ CPU เสมือน (vCPU) และ หน่วยความจำเสมือน (vMemory) ของ VM อยู่ใน Physical NUMA Node เดียวกัน บนเซิร์ฟเวอร์จริงให้มากที่สุด
+
+            2. ผลกระทบต่อประสิทธิภาพ
+
+               หาก Hypervisor ขาด NUMA Awareness หรือมีการจัดสรรทรัพยากรที่ไม่ดี (เช่น จัดสรร vCPU จาก Node 0 แต่ vMemory จาก Node 1):
+
+               - VM จะต้องทำการเข้าถึง Remote Memory บ่อยครั้ง
+
+               - ประสิทธิภาพการทำงานของ VM โดยเฉพาะเวิร์กโหลดที่ต้องใช้หน่วยความจำสูง (Memory-intensive workloads) จะ ลดลงอย่างมาก
+
+             การแม็ป (Mapping) ทรัพยากรอย่างถูกต้องตามโครงสร้าง NUMA ของ Host จึงเป็นกุญแจสำคัญในการรับประกันว่า VM จะได้รับประสิทธิภาพการเข้าถึงหน่วยความจำที่เร็วที่สุด (Local Access) ใกล้เคียงกับการรันบนฮาร์ดแวร์จริง
+    
+           NUMA Awareness (การรับรู้ NUMA) คือความสามารถของระบบปฏิบัติการ (OS), Hypervisor, หรือแอปพลิเคชันในการรับรู้และจัดการ โครงสร้างฮาร์ดแวร์แบบ Non-Uniform Memory Access (NUMA) เพื่อเพิ่มประสิทธิภาพการทำงานสูงสุด
+           1. โครงสร้าง NUMA คืออะไร ?
+
+              - Non-Uniform Memory Access (NUMA) คือสถาปัตยกรรมหน่วยความจำที่ใช้ในระบบเซิร์ฟเวอร์ขนาดใหญ่ที่มี ซ็อกเก็ต CPU หลายตัว (Multi-socket Systems)
+
+              - แต่ละซ็อกเก็ต CPU (หรือกลุ่มคอร์) จะถูกจัดเป็น NUMA Node ซึ่งมี หน่วยความจำเฉพาะของตัวเอง (Local Memory) และ I/O ของตัวเอง .
+
+              - ความไม่สม่ำเสมอ: CPU สามารถเข้าถึงหน่วยความจำที่อยู่บน Node ของตัวเองได้ เร็วกว่า การเข้าถึงหน่วยความจำที่อยู่บน Node อื่น (Remote Memory) ผ่านลิงก์เชื่อมต่อระหว่าง Node (Interconnect Bus)
+    
+           2. NUMA Awareness ทำงานอย่างไร ?
+
+              NUMA Awareness เป็นการปรับปรุงซอฟต์แวร์ (OS Scheduler, Hypervisor หรือแอปพลิเคชัน) เพื่อใช้ประโยชน์จากความแตกต่างของความเร็วในการเข้าถึงหน่วยความจำนี้:
+
+    <img width="894" height="414" alt="NUMA01" src="https://github.com/user-attachments/assets/b29e3deb-c562-423a-bbbd-1dae1df20061" />
+
+42. ในระบบ Cloud (เช่น AWS EC2) การเลือก Instance Type เช่น t2.micro หรือ m5.large หมายถึงอะไร
 
     A) เลือก OS ที่ติดตั้ง
 
@@ -558,7 +637,7 @@
 
     อธิบาย: ใน cloud การเลือก instance type (t2, m5, c5 ฯลฯ) กำหนดขนาดทรัพยากรของ VM — vCPU, memory, network, IO performance และลักษณะพิเศษเช่น burstable credits
 
-41. Virtual Switch (vSwitch) มีหน้าที่อะไรใน Virtual Network
+43. Virtual Switch (vSwitch) มีหน้าที่อะไรใน Virtual Network
 
     A) จำลองพอร์ตเชื่อมต่อ Network ระหว่าง VM
 
@@ -572,7 +651,7 @@
 
     อธิบาย: vSwitch ทำหน้าที่เป็นสวิตช์ภายใน virtual network — เชื่อม VM กันหรือเชื่อม VM กับ external network, รองรับ VLAN, port-group, security policies, traffic shaping และ mirror
 
-42. “Bridged Networking” ต่างจาก “NAT Networking” อย่างไรใน VM
+44. “Bridged Networking” ต่างจาก “NAT Networking” อย่างไรใน VM
 
     A) Bridged ใช้ IP เดียวกับ Host
 
@@ -586,7 +665,7 @@
 
     อธิบาย: ใน NAT mode VM ออกอินเทอร์เน็ตผ่าน IP ของ host (หรือ NAT gateway) ทำให้ VM ไม่ถูกเข้าถึงจากภายนอกโดยตรง (ต้องทำ port forwarding) ขณะที่ Bridged ให้ VM อยู่บน LAN เดียวกันและได้ IP ของ network จริง
 
-43. ฟีเจอร์ “Nested Virtualization” หมายถึงอะไร
+45. ฟีเจอร์ “Nested Virtualization” หมายถึงอะไร
 
     A) การรัน VM ภายใน VM อีกชั้นหนึ่ง
 
@@ -600,7 +679,7 @@
 
     อธิบาย: Nested virtualization คือการรัน hypervisor ภายใน guest (VM ที่รัน VM อีกชั้น) — ใช้ใน lab/test หรือ virtualization development ต้องการการสนับสนุนจาก CPU/hypervisor
 
-44. การใช้ “Template” ในระบบจัดการ VM มีประโยชน์อย่างไร
+46. การใช้ “Template” ในระบบจัดการ VM มีประโยชน์อย่างไร
 
     A) เพิ่มประสิทธิภาพการจำลองเสียง
 
@@ -614,7 +693,7 @@
 
     อธิบาย: Template เป็นต้นแบบของ VM ที่บรรจุ OS + config + packages — ใช้ deploy VM ใหม่อย่างรวดเร็วและสม่ำเสมอ ลดความผิดพลาดจากการตั้งค่าด้วยมือ
 
-45. ถ้า Snapshot ถูกลบโดยไม่ Merge กลับไปยัง Disk หลัก จะเกิดผลอย่างไร
+47. ถ้า Snapshot ถูกลบโดยไม่ Merge กลับไปยัง Disk หลัก จะเกิดผลอย่างไร
 
     A) ไม่มีผลกระทบ
 
@@ -628,7 +707,7 @@
 
     อธิบาย: ถ้าลบ snapshot โดยไม่ merge ข้อมูลที่อยู่ใน snapshot อาจหลุดหรือสูญหาย (ขึ้นกับ implementation) — การลบ snapshot มักต้องมี consolidation (merge) เข้ากับ base disk เพื่อรักษาความต่อเนื่องของข้อมูล
 
-46. การใช้ “Cloud-init” ใน VM มีจุดประสงค์อะไร
+48. การใช้ “Cloud-init” ใน VM มีจุดประสงค์อะไร
 
     A) ใช้บูตเครื่องเร็วขึ้น
 
@@ -642,7 +721,7 @@
 
     อธิบาย: cloud-init ใช้สำหรับ ตั้งค่าระบบอัตโนมัติที่ first boot (เช่น สร้าง user, ใส่ SSH keys, config network, run scripts) — ทำ provisioning แบบ automated เมื่อ deploy images บน cloud
 
-47. “VM Sprawl” คืออะไร
+49. “VM Sprawl” คืออะไร
 
     A) การรัน VM หลายเครื่องโดยไม่จัดการ ทำให้เกิดความซ้ำซ้อนและใช้ทรัพยากรเกิน
 
@@ -656,7 +735,7 @@
 
     อธิบาย: VM Sprawl คือการสร้าง VM จำนวนมากโดยขาด governance — ทำให้ resource waste, security risk (unpatched), และเพิ่มค่าใช้จ่าย การควบคุมด้วย tagging, lifecycle policy, automation ช่วยแก้ปัญหา
 
-48. การรักษาความปลอดภัยของ VM ทำได้ดีที่สุดโดยแนวทางใด
+50. การรักษาความปลอดภัยของ VM ทำได้ดีที่สุดโดยแนวทางใด
 
     A) ปิด Firewall
 
@@ -670,7 +749,7 @@
 
     อธิบาย: การรักษาความปลอดภัย VM ที่ดีรวม network isolation (VLANs, security groups), patching, access control management plane, encryption, และการทดสอบผ่าน snapshots (sandbox testing) — ปิด firewall หรือรัน root ไม่ใช่แนวทางที่ปลอดภัย
 
-49. ข้อใดคือปัญหาที่เกิดขึ้นเมื่อ Overcommit RAM มากเกินไป
+51. ข้อใดคือปัญหาที่เกิดขึ้นเมื่อ Overcommit RAM มากเกินไป
 
     A) ระบบหยุดทำงานทันที
 
@@ -684,7 +763,7 @@
 
     อธิบาย: เมื่อ overcommit RAM มากไป VM/host จะเริ่มใช้ swap (hypervisor swap หรือ guest swap) ทำให้ performance ลดลงอย่างมาก (I/O bound) — อาจนำไปสู่ OOM และกระทบความเสถียร
 
-50. Hypervisor ที่มาพร้อม Linux Kernel โดยตรงคืออะไร
+52. Hypervisor ที่มาพร้อม Linux Kernel โดยตรงคืออะไร
 
     A) VMware ESXi
 
@@ -698,7 +777,7 @@
 
     อธิบาย: KVM (Kernel-based Virtual Machine) เป็น hypervisor ที่เป็นส่วนหนึ่งของ Linux kernel — ใช้ QEMU ใน userland สำหรับ device emulation และ libvirt เป็น toolstack ที่นิยมใช้ร่วม
 
-51. การใช้ “SR-IOV” ใน VM มีประโยชน์อะไร
+53. การใช้ “SR-IOV” ใน VM มีประโยชน์อะไร
 
     A) แยก Storage ให้ VM
 
@@ -712,7 +791,7 @@
 
     อธิบาย: SR-IOV แยก physical NIC เป็น virtual functions ให้ VM เข้าถึง network device โดยตรง (ผ่าน VF) เพิ่ม throughput และลด latency เทียบกับ hypervisor-mediated I/O แต่ trade-off คือความยืดหยุ่น (live migration ยากขึ้น)
 
-52. ข้อใดต่อไปนี้ไม่ใช่ส่วนหนึ่งของ “VM Lifecycle”
+54. ข้อใดต่อไปนี้ไม่ใช่ส่วนหนึ่งของ “VM Lifecycle”
 
     A) Provisioning
 
@@ -726,7 +805,7 @@
 
     อธิบาย: VM lifecycle ประกอบด้วย provisioning, deployment, management, termination แต่ compilation ไม่ใช่ขั้นตอนของ lifecycle (เป็นการแปลงโค้ด)
 
-53. ในการใช้งาน VirtualBox, “Guest Additions” มีหน้าที่อะไร
+55. ในการใช้งาน VirtualBox, “Guest Additions” มีหน้าที่อะไร
 
     A) เพิ่มฟีเจอร์ เช่น Shared Clipboard, Mouse Integration, Display Driver
 
@@ -752,7 +831,7 @@
    
     - Time Synchronization ช่วยให้ Guest OS มีเวลาที่ตรงกับ Host OS อยู่เสมอ
     
-54. ข้อใดเป็นการปรับจูน (Tuning) เพื่อเพิ่มประสิทธิภาพของ VM
+56. ข้อใดเป็นการปรับจูน (Tuning) เพื่อเพิ่มประสิทธิภาพของ VM
 
     A) ปิด Ballooning
 
@@ -766,7 +845,7 @@
 
     อธิบาย: การใช้ VirtIO drivers สำหรับ disk/network เป็นการปรับจูนสำคัญ — ลด overhead ของ emulated devices, เพิ่ม throughput และลด latency อีกวิธีคือ NUMA tuning, hugepages, CPU pinning, และ storage tuning
 
-55. ในระบบ Cloud เช่น Azure, “Availability Set” เกี่ยวข้องกับอะไรของ VM
+57. ในระบบ Cloud เช่น Azure, “Availability Set” เกี่ยวข้องกับอะไรของ VM
 
     A) การกระจาย VM หลายเครื่องข้าม Host เพื่อความทนทานสูง
 
@@ -780,7 +859,7 @@
 
     อธิบาย: Availability Set ใน Azure ช่วย กระจาย VM ข้าม physical hosts / fault domains และ update domains เพื่อเพิ่ม availability ของ application — ลดโอกาส downtime ถ้ามี host failure หรือ during maintenance
 
-56. “VM Escape Attack” คืออะไร
+58. “VM Escape Attack” คืออะไร
 
     A) การที่ผู้ใช้ VM ออกจากระบบ
 
@@ -794,7 +873,7 @@
 
     อธิบาย: VM Escape เป็นการโจมตีที่ attacker ใน guest สามารถหลุดออกไปควบคุม host หรือ hypervisor ได้ — ทำลาย isolation เป็นความเสี่ยงร้ายแรง ต้อง patch hypervisor และลดการรัน code ที่ไม่น่าเชื่อถือใน environment สำคัญ
 
-57. ถ้า VM ทำงานช้าแม้ Host CPU ยังเหลือมาก มักเกิดจากสาเหตุใด
+59. ถ้า VM ทำงานช้าแม้ Host CPU ยังเหลือมาก มักเกิดจากสาเหตุใด
 
     A) Disk I/O bottleneck หรือ vStorage ถูกแชร์มากเกินไป
 
@@ -808,7 +887,7 @@
 
     อธิบาย: ถ้า VM ช้าแม้ host CPU เหลือมาก สาเหตุส่วนใหญ่คือ disk I/O bottleneck หรือ contention ใน vStorage (เช่น noisy neighbor, slow storage array, snapshot chain) — ควรดู metrics IOPS, latency, queue depth
 
-58. “Hypervisor Scheduling” คืออะไร
+60. “Hypervisor Scheduling” คืออะไร
 
     A) การจัดการลำดับการประมวลผล vCPU ให้แบ่งใช้ทรัพยากร Host CPU
 
@@ -822,7 +901,7 @@
 
     อธิบาย: Hypervisor scheduling เป็นการ จัดการ mapping/เวลาให้ vCPU ใช้ pCPU — algorithms ต่าง ๆ (round-robin, fair share, real-time) มีผลต่อ CPU ready time และ performance ของ VM
 
-59. การสำรองข้อมูล VM แบบ “Cold Backup” หมายถึงอะไร
+61. การสำรองข้อมูล VM แบบ “Cold Backup” หมายถึงอะไร
 
     A) Backup ระหว่างที่ VM กำลังทำงานอยู่
 
@@ -836,7 +915,7 @@
 
     อธิบาย: Cold backup คือการสำรองข้อมูล ขณะที่ VM ปิดอยู่ (offline) — ข้อดีคือ consistency ง่าย (no writes during backup) แต่มี downtime ต่างจาก hot backup ที่ต้องทำขณะที่ VM ยังทำงาน
 
-60. ถ้าในระบบ Cloud มีการคิดค่าบริการแบบ “Reserved Instance” แตกต่างจาก “Pay-as-you-go” อย่างไร
+62. ถ้าในระบบ Cloud มีการคิดค่าบริการแบบ “Reserved Instance” แตกต่างจาก “Pay-as-you-go” อย่างไร
 
     A) Reserved Instance จ่ายตามการใช้งานจริง
 
